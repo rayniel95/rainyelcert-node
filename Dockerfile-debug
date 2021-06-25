@@ -32,21 +32,25 @@ RUN export HTTP_PROXY="http://192.168.49.1:8282" \
 
 WORKDIR /usr/src/app
 
+# COPY ./node/Cargo.toml ./node
+# COPY ./pallets/Cargo.toml ./pallets
+# COPY ./runtime/Cargo.toml ./runtime
+# COPY ./Cargo.lock ./Cargo.toml ./
+
+# RUN export HTTP_PROXY="http://192.168.49.1:8282" \
+#     && export http_proxy="http://192.168.49.1:8282" \
+#     https_proxy="http://192.168.49.1:8282" \
+#     && . $HOME/.cargo/env \
+#     && cargo fetch \
+#     && unset HTTP_PROXY http_proxy https_proxy
+
 COPY ./ ./
 
-RUN export HTTP_PROXY="http://192.168.49.1:8282" \
-    && export http_proxy="http://192.168.49.1:8282" \
-    https_proxy="http://192.168.49.1:8282" \
-    && . $HOME/.cargo/env \
-    && cargo build --release \
-    && unset HTTP_PROXY http_proxy https_proxy
+CMD cargo --help
 
-################################################################
+# set -p "9944:9944"
 
-FROM docker.uclv.cu/ubuntu:focal
-    
-COPY --from=builder /usr/src/app/target /usr/local/bin/myapp
-
-WORKDIR /usr/local/bin/myapp
-
-CMD ["release/node-template"]
+# there is a problem with cargo and the proxy, por alguna razon cargo no 
+# consigue descargar las dependencias a traves del proxy, es necesario poner una
+# vpn a todo el sitema, son solo 200 mb de dependencia, lo ideal es tratar de 
+# cachearlos en un volumen
