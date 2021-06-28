@@ -1,3 +1,11 @@
+Problems:
+
+For some reason it is necessary to use vpn for download crates inside docker container. Crates cache is not allowed for some reason, mount volume not work, bind volume not work, solution to this, compile in the host and copy the artifacts to docker image. A better solution would be use cargo chef to compile and layered crates in docker image.
+
+# Requirements
+
+- cargo-chef v0.1.21
+
 # Substrate Node Template
 
 [![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=node-template)
