@@ -45,7 +45,7 @@ RUN export HTTP_PROXY="http://192.168.49.1:8282" \
     && export http_proxy="http://192.168.49.1:8282" \
     https_proxy="http://192.168.49.1:8282" \
     && . $HOME/.cargo/env \
-    && cargo chef cook --release \ 
+    && cargo chef cook \ 
     && unset HTTP_PROXY http_proxy https_proxy
 
 COPY ./ ./
