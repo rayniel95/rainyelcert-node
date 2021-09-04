@@ -30,7 +30,23 @@ RUN export HTTP_PROXY="http://192.168.49.1:8282" \
     && rustup target add wasm32-unknown-unknown --toolchain nightly \
     && unset HTTP_PROXY http_proxy https_proxy
 
+RUN export HTTP_PROXY="http://192.168.49.1:8282" \
+    && export http_proxy="http://192.168.49.1:8282" \
+    https_proxy="http://192.168.49.1:8282" \
+    && . $HOME/.cargo/env \
+    && cargo install cargo-chef --version 0.1.21 \
+    && unset HTTP_PROXY http_proxy https_proxy
+
 WORKDIR /usr/src/app
+
+COPY ./recipe.json ./
+# do not use in cargo chef cook --release
+RUN export HTTP_PROXY="http://192.168.49.1:8282" \
+    && export http_proxy="http://192.168.49.1:8282" \
+    https_proxy="http://192.168.49.1:8282" \
+    && . $HOME/.cargo/env \
+    && cargo chef cook --release \ 
+    && unset HTTP_PROXY http_proxy https_proxy
 
 COPY ./ ./
 
@@ -38,15 +54,15 @@ RUN export HTTP_PROXY="http://192.168.49.1:8282" \
     && export http_proxy="http://192.168.49.1:8282" \
     https_proxy="http://192.168.49.1:8282" \
     && . $HOME/.cargo/env \
-    && cargo build --release \
+    && cargo build --offline \
     && unset HTTP_PROXY http_proxy https_proxy
 
 ################################################################
 
 FROM docker.uclv.cu/ubuntu:focal
     
-COPY --from=builder /usr/src/app/target /usr/local/bin/myapp
-
+COPY --from=builder /usr/src/app/target/debug /usr/local/bin/myapp
+ 
 WORKDIR /usr/local/bin/myapp
 
-CMD ["release/node-template"]
+CMD ["./node-template --help"]
