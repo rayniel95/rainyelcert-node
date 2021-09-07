@@ -39,6 +39,8 @@ pub use frame_support::{
 };
 use pallet_transaction_payment::CurrencyAdapter;
 
+use pallet_contracts::weights::WeightInfo;
+
 /// Import the template pallet.
 pub use pallet_template;
 
@@ -274,6 +276,59 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
+
+parameter_types! {
+	pub const TombstoneDeposit: Balance = 0;
+	pub const DepositPerContract: Balance = 0;
+	pub const DepositPerStorageByte: Balance = 0;
+	pub const DepositPerStorageItem: Balance = 0;
+	// TODO - configure this
+	// pub RentFraction: Perbill = 0;
+	// TODO - configure this
+	pub const SurchargeReward: Balance = 0;
+	// TODO - configure this
+	pub const SignedClaimHandicap: u32 = 2;
+	pub const MaxDepth: u32 = 32;
+	pub const MaxValueSize: u32 = 16 * 1024;
+	// TODO - configure this
+	// The lazy deletion runs inside on_initialize.
+	pub DeletionWeightLimit: Weight = AVERAGE_ON_INITIALIZE_RATIO *
+		BlockWeights::get().max_block;
+	// TODO - configure this
+	// The weight needed for decoding the queue should be less or equal than a fifth
+	// of the overall weight dedicated to the lazy deletion.
+	pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get() / (
+			<Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(1) -
+			<Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(0)
+		)) / 5) as u32;
+	pub MaxCodeSize: u32 = 128 * 1024;
+}
+// TODO - try to configure the parameters here, maybe with () struct
+impl pallet_contracts::Config for Runtime {
+	type Time = Timestamp;
+	type Randomness = RandomnessCollectiveFlip;
+	// TODO - it is possible to configure this to no pay for execution?
+	type Currency = Balances;
+	type Event = Event;
+	type RentPayment = ();
+	type SignedClaimHandicap = SignedClaimHandicap;
+	type TombstoneDeposit = TombstoneDeposit;
+	type DepositPerContract = DepositPerContract;
+	type DepositPerStorageByte = DepositPerStorageByte;
+	type DepositPerStorageItem = DepositPerStorageItem;
+	type RentFraction = ();
+	type SurchargeReward = SurchargeReward;
+	type MaxDepth = MaxDepth;
+	type MaxValueSize = MaxValueSize;
+	type WeightPrice = pallet_transaction_payment::Module<Self>;
+	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
+	type ChainExtension = ();
+	type DeletionQueueDepth = DeletionQueueDepth;
+	type DeletionWeightLimit = DeletionWeightLimit;
+	type MaxCodeSize = MaxCodeSize;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -291,6 +346,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
+		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
 	}
 );
 
