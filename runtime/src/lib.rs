@@ -329,6 +329,8 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeSize = MaxCodeSize;
 }
 
+impl rayniel95_pallet_sudo_smart_contracts::Config for Runtime{}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -347,8 +349,11 @@ construct_runtime!(
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
 		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
+		SudoContracts: rayniel95_pallet_sudo_smart_contracts::{Pallet, Call},
 	}
 );
+// TODO - use contracts or pallet contracts name to rename sudo smart contracts
+// this will help to call directrly from polkajs 
 
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
