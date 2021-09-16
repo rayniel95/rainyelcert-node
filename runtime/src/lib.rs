@@ -554,7 +554,7 @@ impl_runtime_apis! {
 			Ok(batches)
 		}
 	}
-	// TODO - this api need to be modified to point to a pallet contract wrapper
+
 	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, 
 		AccountId, Balance, BlockNumber, Hash>
 	for Runtime
