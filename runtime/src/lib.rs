@@ -590,7 +590,11 @@ impl_runtime_apis! {
 		fn rent_projection(
 			address: AccountId,
 		) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
-			Contracts::rent_projection(address)
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result
+			Err(
+				pallet_contracts_primitives::ContractAccessError::DoesntExist
+			)
 		}
 	}
 }
