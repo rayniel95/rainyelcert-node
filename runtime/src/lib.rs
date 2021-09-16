@@ -577,7 +577,15 @@ impl_runtime_apis! {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, BlockNumber> {
-			Contracts::bare_instantiate(origin, endowment, gas_limit, code, data, salt, true)
+				// NOTE - this need to be implemented (mandatory), the idea is to 
+				// create a fixed worng result			
+			pallet_contracts_primitives::ContractInstantiateResult{
+				gas_consumed: 0,
+				debug_message: sp_core::Bytes::from(Vec::<u8>::new()),
+				result: Err(
+					sp_runtime::DispatchError::BadOrigin
+				)
+			}
 		}
 
 		fn get_storage(
