@@ -66,7 +66,7 @@ pub fn create_full<C, P>(
 
 	io.extend_with(
 		ContractsApi::to_delegate(Contracts::new(client.clone()))
-	 );
+	);
 
 	io
 }
