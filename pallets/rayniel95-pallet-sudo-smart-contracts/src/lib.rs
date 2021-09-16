@@ -181,6 +181,7 @@ pub mod pallet {
 					}
 					result
 				}
+				Ok(RawOrigin::Root) => Ok(()),
 				_ => Err(DispatchError::BadOrigin),
 			};
 			test_origin
