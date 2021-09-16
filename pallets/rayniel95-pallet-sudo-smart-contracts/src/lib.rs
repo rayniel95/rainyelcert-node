@@ -7,6 +7,9 @@ use sp_core::crypto::UncheckedFrom;
 
 use sp_runtime::traits::StaticLookup;
 use frame_support::traits::Currency;
+use pallet_contracts::Schedule;
+
+type CodeHash<T> = <T as frame_system::Config>::Hash;
 
 type BalanceOf<T> =
 	<<T as pallet_contracts::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -18,13 +21,13 @@ pub use pallet::*;
 pub mod pallet {
     use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
     use frame_system::pallet_prelude::*;
+	use frame_system::RawOrigin;
     use sp_std::vec::Vec; // Step 3.1 will include this in `Cargo.toml`
 	use super::*;
-    // NOTE - it is neccesary to access to a contracts instantia from the 
-    // wrapper?
-	// NOTE - it is necessary to inherit from sudo config and contracts config?
-    #[pallet::config]  // <-- Step 2. code block will replace this.
-	pub trait Config: frame_system::Config + pallet_contracts::Config{
+
+	#[pallet::config]  // <-- Step 2. code block will replace this.
+	pub trait Config: 
+		frame_system::Config + pallet_contracts::Config + pallet_sudo::Config {
 		// type Currency: Currency<Self::AccountId>;
     }
     // #[pallet::event]   // <-- Step 3. code block will replace this.
@@ -65,6 +68,7 @@ pub mod pallet {
 			#[pallet::compact] gas_limit: Weight,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			// TODO - test different call syntax to check wich consume gas fees
             pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
             )
@@ -101,9 +105,85 @@ pub mod pallet {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
             pallet_contracts::Pallet::<T>::instantiate_with_code(
                 origin, endowment, gas_limit, code, data, salt
             )
 		}
+		/// Updates the schedule for metering contracts.
+		///
+		/// The schedule's version cannot be less than the version of the stored schedule.
+		/// If a schedule does not change the instruction weights the version does not
+		/// need to be increased. Therefore we allow storing a schedule that has the same
+		/// version as the stored one.
+		#[pallet::weight(0)]
+		pub fn update_schedule(
+			origin: OriginFor<T>,
+			schedule: Schedule<T>
+		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
+			pallet_contracts::Pallet::update_schedule(origin, schedule)
+		}
+
+		/// Instantiates a contract from a previously deployed wasm binary.
+		///
+		/// This function is identical to [`Self::instantiate_with_code`] but without the
+		/// code deployment step. Instead, the `code_hash` of an on-chain deployed wasm binary
+		/// must be supplied.
+		#[pallet::weight(0)]
+		pub fn instantiate(
+			origin: OriginFor<T>,
+			#[pallet::compact] endowment: BalanceOf<T>,
+			#[pallet::compact] gas_limit: Weight,
+			code_hash: CodeHash<T>,
+			data: Vec<u8>,
+			salt: Vec<u8>,
+		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
+			pallet_contracts::Pallet::<T>::instantiate(
+				origin, endowment, gas_limit, code_hash, data, salt
+			)
+		}
+		/// Allows block producers to claim a small reward for evicting a contract. If a block
+		/// producer fails to do so, a regular users will be allowed to claim the reward.
+		///
+		/// In case of a successful eviction no fees are charged from the sender. However, the
+		/// reward is capped by the total amount of rent that was payed by the contract while
+		/// it was alive.
+		///
+		/// If contract is not evicted as a result of this call, [`Error::ContractNotEvictable`]
+		/// is returned and the sender is not eligible for the reward.
+		#[pallet::weight(0)]
+		pub fn claim_surcharge(
+			origin: OriginFor<T>,
+			dest: T::AccountId,
+			aux_sender: Option<T::AccountId>
+		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
+			pallet_contracts::Pallet::<T>::claim_surcharge(
+				origin, dest, aux_sender
+			)
+		}
+	}
+
+	impl<T: Config> Pallet<T>
+	where
+		T::AccountId: UncheckedFrom<T::Hash>,
+		T::AccountId: AsRef<[u8]>,
+	{
+		fn is_root(origin: OriginFor<T>) -> Result<(), DispatchError>{
+			let sudo_key = pallet_sudo::Pallet::<T>::key();
+			let test_origin = match origin.into() {
+				Ok(RawOrigin::Signed(account_id)) => {
+					let mut result = Ok(());
+					if sudo_key != account_id{
+						result = Err(DispatchError::BadOrigin);
+					}
+					result
+				}
+				_ => Err(DispatchError::BadOrigin),
+			};
+			test_origin
+		}	
 	}
 }

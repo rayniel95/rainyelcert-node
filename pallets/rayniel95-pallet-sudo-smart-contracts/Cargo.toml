@@ -27,6 +27,7 @@ frame-system = {default-features = false, version = '3.0.0', git = 'https://gith
 # pallet-contracts dependencies
 pallet-contracts = { default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 pallet-contracts-primitives = { default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
+pallet-sudo = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 [dev-dependencies]
 serde = '1.0.119'

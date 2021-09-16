@@ -348,6 +348,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Pallet, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
+		// TODO - remember to make a pallet_contracts uncallable
 		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
 		SudoContracts: rayniel95_pallet_sudo_smart_contracts::{Pallet, Call},
 	}

@@ -4977,6 +4977,7 @@ dependencies = [
  "frame-system",
  "pallet-contracts",
  "pallet-contracts-primitives",
+ "pallet-sudo",
  "parity-scale-codec",
  "serde",
  "sp-core",
