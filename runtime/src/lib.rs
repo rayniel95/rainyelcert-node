@@ -566,9 +566,17 @@ impl_runtime_apis! {
 			gas_limit: u64,
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult {
-			Contracts::bare_call(origin, dest, value, gas_limit, input_data)
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result	
+			pallet_contracts_primitives::ContractExecResult{
+				gas_consumed: 0,
+				debug_message: sp_core::Bytes::from(Vec::<u8>::new()),
+				result: Err(
+					sp_runtime::DispatchError::BadOrigin
+				)
+			}
 		}
-
+		// TODO - getting error in polkadotjs for this rpc call
 		fn instantiate(
 			origin: AccountId,
 			endowment: Balance,
@@ -577,8 +585,8 @@ impl_runtime_apis! {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, BlockNumber> {
-				// NOTE - this need to be implemented (mandatory), the idea is to 
-				// create a fixed worng result			
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result			
 			pallet_contracts_primitives::ContractInstantiateResult{
 				gas_consumed: 0,
 				debug_message: sp_core::Bytes::from(Vec::<u8>::new()),
