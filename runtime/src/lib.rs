@@ -554,7 +554,7 @@ impl_runtime_apis! {
 			Ok(batches)
 		}
 	}
-	// TODO - this api need to be modified to point to a pallet contract wrapper
+
 	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, 
 		AccountId, Balance, BlockNumber, Hash>
 	for Runtime
@@ -566,9 +566,17 @@ impl_runtime_apis! {
 			gas_limit: u64,
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult {
-			Contracts::bare_call(origin, dest, value, gas_limit, input_data)
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result	
+			pallet_contracts_primitives::ContractExecResult{
+				gas_consumed: 0,
+				debug_message: sp_core::Bytes::from(Vec::<u8>::new()),
+				result: Err(
+					sp_runtime::DispatchError::BadOrigin
+				)
+			}
 		}
-
+		// TODO - getting error in polkadotjs for this rpc call
 		fn instantiate(
 			origin: AccountId,
 			endowment: Balance,
@@ -577,7 +585,15 @@ impl_runtime_apis! {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, BlockNumber> {
-			Contracts::bare_instantiate(origin, endowment, gas_limit, code, data, salt, true)
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result			
+			pallet_contracts_primitives::ContractInstantiateResult{
+				gas_consumed: 0,
+				debug_message: sp_core::Bytes::from(Vec::<u8>::new()),
+				result: Err(
+					sp_runtime::DispatchError::BadOrigin
+				)
+			}
 		}
 
 		fn get_storage(
@@ -590,7 +606,11 @@ impl_runtime_apis! {
 		fn rent_projection(
 			address: AccountId,
 		) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
-			Contracts::rent_projection(address)
+			// NOTE - this need to be implemented (mandatory), the idea is to 
+			// create a fixed worng result
+			Err(
+				pallet_contracts_primitives::ContractAccessError::DoesntExist
+			)
 		}
 	}
 }
