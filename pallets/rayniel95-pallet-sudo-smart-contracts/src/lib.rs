@@ -19,7 +19,10 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
+    use frame_support::{
+		dispatch::DispatchResultWithPostInfo, pallet_prelude::*,
+		weights::PostDispatchInfo
+	};
     use frame_system::pallet_prelude::*;
 	use frame_system::RawOrigin;
     use sp_std::vec::Vec; // Step 3.1 will include this in `Cargo.toml`
@@ -108,7 +111,14 @@ pub mod pallet {
 			Self::is_root(origin.clone())?;
             pallet_contracts::Pallet::<T>::instantiate_with_code(
                 origin, endowment, gas_limit, code, data, salt
-            )
+            ).map(
+				|_| PostDispatchInfo{
+					pays_fee: Pays::No,
+					actual_weight: Some(
+						0
+					)
+				}
+			)
 		}
 		/// Updates the schedule for metering contracts.
 		///
