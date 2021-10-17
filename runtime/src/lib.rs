@@ -328,7 +328,7 @@ impl pallet_contracts::Config for Runtime {
 	type DeletionWeightLimit = DeletionWeightLimit;
 	type MaxCodeSize = MaxCodeSize;
 }
-
+// TODO - maybe it is necessary to override the pallet contract properties here?
 impl rayniel95_pallet_sudo_smart_contracts::Config for Runtime{}
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
