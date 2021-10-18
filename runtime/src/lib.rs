@@ -322,7 +322,7 @@ impl pallet_contracts::Config for Runtime {
 	type MaxDepth = MaxDepth;
 	type MaxValueSize = MaxValueSize;
 	type WeightPrice = ();
-	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
+	type WeightInfo = ();
 	type ChainExtension = ();
 	type DeletionQueueDepth = DeletionQueueDepth;
 	type DeletionWeightLimit = DeletionWeightLimit;
