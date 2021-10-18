@@ -74,7 +74,8 @@ pub mod pallet {
 			// TODO - test different call syntax to check wich consume gas fees
             pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
-            )
+            );
+			Ok(Pays::No.into())
 		}
 
 		/// Instantiates a new contract from the supplied `code` optionally transferring
@@ -111,15 +112,8 @@ pub mod pallet {
 			Self::is_root(origin.clone())?;
             pallet_contracts::Pallet::<T>::instantiate_with_code(
                 origin, endowment, gas_limit, code, data, salt
-            ).map(
-				|_| PostDispatchInfo{
-					pays_fee: Pays::No,
-					actual_weight: Some(
-						0
-					)
-				}
-			)
-			// TODO - return the ()
+            );
+			Ok(Pays::No.into())
 		}
 		/// Updates the schedule for metering contracts.
 		///
@@ -153,7 +147,8 @@ pub mod pallet {
 			Self::is_root(origin.clone())?;
 			pallet_contracts::Pallet::<T>::instantiate(
 				origin, endowment, gas_limit, code_hash, data, salt
-			)
+			);
+			Ok(Pays::No.into())
 		}
 		/// Allows block producers to claim a small reward for evicting a contract. If a block
 		/// producer fails to do so, a regular users will be allowed to claim the reward.
