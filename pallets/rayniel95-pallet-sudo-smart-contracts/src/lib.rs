@@ -7,7 +7,7 @@ use sp_core::crypto::UncheckedFrom;
 
 use sp_runtime::traits::StaticLookup;
 use frame_support::traits::Currency;
-use pallet_contracts::Schedule;
+use pallet_contracts::{Schedule};
 
 type CodeHash<T> = <T as frame_system::Config>::Hash;
 
@@ -20,7 +20,11 @@ pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::{
-		dispatch::DispatchResultWithPostInfo, pallet_prelude::*,
+		dispatch::{
+			DispatchResultWithPostInfo,
+			DispatchErrorWithPostInfo
+		}, 
+		pallet_prelude::*,
 		weights::PostDispatchInfo
 	};
     use frame_system::pallet_prelude::*;
@@ -75,6 +79,16 @@ pub mod pallet {
             pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
             );
+			// TODO - put the errors to, maybe make a map of the previous call
+			// let post_info = PostDispatchInfo {
+			// 	actual_weight: Some(0),
+			// 	pays_fee: Pays::No,
+			// };
+	
+			// result
+			// 	.map(|_| post_info)
+			// 	.map_err(|e| DispatchErrorWithPostInfo { post_info, error: e.error })
+
 			Ok(Pays::No.into())
 		}
 
