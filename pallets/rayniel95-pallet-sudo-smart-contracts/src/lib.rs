@@ -76,20 +76,24 @@ pub mod pallet {
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			// TODO - test different call syntax to check wich consume gas fees
-            pallet_contracts::Pallet::<T>::call(
+            let result = pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
-            );
-			// TODO - put the errors to, maybe make a map of the previous call
-			// let post_info = PostDispatchInfo {
-			// 	actual_weight: Some(0),
-			// 	pays_fee: Pays::No,
-			// };
-	
-			// result
-			// 	.map(|_| post_info)
-			// 	.map_err(|e| DispatchErrorWithPostInfo { post_info, error: e.error })
-
-			Ok(Pays::No.into())
+            );	
+			result
+				.map(
+					|mut post_info| {
+						post_info.actual_weight = None;
+						post_info.pays_fee = Pays::No;
+						post_info
+					}
+				)
+				.map_err(
+					|mut e| {
+						e.post_info.actual_weight = None;
+						e.post_info.pays_fee = Pays::No;
+						e
+					}
+				)
 		}
 
 		/// Instantiates a new contract from the supplied `code` optionally transferring
@@ -114,7 +118,7 @@ pub mod pallet {
 		/// - The smart-contract account is created at the computed address.
 		/// - The `endowment` is transferred to the new account.
 		/// - The `deploy` function is executed in the context of the newly-created account.
-		#[pallet::weight(0)]
+		#[pallet::weight(0)] // TODO - put here Pays::No and DispatchClass::Normal
 		pub fn instantiate_with_code(
 			origin: OriginFor<T>,
 			#[pallet::compact] endowment: BalanceOf<T>,
@@ -124,10 +128,26 @@ pub mod pallet {
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::is_root(origin.clone())?;
-            pallet_contracts::Pallet::<T>::instantiate_with_code(
+            let result = pallet_contracts::Pallet::<T>::instantiate_with_code(
                 origin, endowment, gas_limit, code, data, salt
             );
-			Ok(Pays::No.into())
+			result
+				.map(
+					|mut post_info| {
+						post_info.actual_weight = None;
+						post_info.pays_fee = Pays::No;
+						post_info
+					}
+				)
+				.map_err(
+					|mut e| {
+						e.post_info.actual_weight = None;
+						e.post_info.pays_fee = Pays::No;
+						e
+					}
+				)
+				// FIXME - For some reason if I use Ok(Pays::No.into()) I do not need to pay
+				// fee but event are not launched
 		}
 		/// Updates the schedule for metering contracts.
 		///
@@ -159,10 +179,24 @@ pub mod pallet {
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::is_root(origin.clone())?;
-			pallet_contracts::Pallet::<T>::instantiate(
+			let result = pallet_contracts::Pallet::<T>::instantiate(
 				origin, endowment, gas_limit, code_hash, data, salt
 			);
-			Ok(Pays::No.into())
+			result
+				.map(
+					|mut post_info| {
+						post_info.actual_weight = None;
+						post_info.pays_fee = Pays::No;
+						post_info
+					}
+				)
+				.map_err(
+					|mut e| {
+						e.post_info.actual_weight = None;
+						e.post_info.pays_fee = Pays::No;
+						e
+					}
+				)
 		}
 		/// Allows block producers to claim a small reward for evicting a contract. If a block
 		/// producer fails to do so, a regular users will be allowed to claim the reward.
