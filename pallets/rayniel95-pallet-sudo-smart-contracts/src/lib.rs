@@ -38,8 +38,14 @@ pub mod pallet {
 		// type Currency: Currency<Self::AccountId>;
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
     }
-    // #[pallet::event]   // <-- Step 3. code block will replace this.
-	
+    #[pallet::event]   // <-- Step 3. code block will replace this.
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+	/// Event emitted when a proof has been claimed. [who, claim]
+		/// Event emitted when a claim is revoked by the owner. [who, claim]
+		SudoContractDone(DispatchResult),
+	}
+
     #[pallet::error]   // <-- Step 4. code block will replace this.
     pub enum Error<T> {
 		/// The origin is not the root origin
@@ -65,7 +71,7 @@ pub mod pallet {
 		/// * If the account is a regular account, any value will be transferred.
 		/// * If no account exists and the call value is not less than `existential_deposit`,
 		/// a regular account will be created and any value will be transferred.
-		#[pallet::weight((0, Pays::No))]
+		#[pallet::weight(0)]
 		pub fn call(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -77,21 +83,12 @@ pub mod pallet {
             let result = pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
             );	
-			// result
-			// 	.map(
-			// 		|mut post_info| {
-			// 			post_info.actual_weight = Some(0);
-			// 			post_info.pays_fee = Pays::No;
-			// 			post_info
-			// 		}
-			// 	)
-			// 	.map_err(
-			// 		|mut e| {
-			// 			e.post_info.actual_weight = Some(0);
-			// 			e.post_info.pays_fee = Pays::No;
-			// 			e
-			// 		}
-			// 	)
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
+
 			Ok(Pays::No.into())
 		}
 
@@ -117,7 +114,7 @@ pub mod pallet {
 		/// - The smart-contract account is created at the computed address.
 		/// - The `endowment` is transferred to the new account.
 		/// - The `deploy` function is executed in the context of the newly-created account.
-		#[pallet::weight((0, Pays::No))] // TODO - put here Pays::No and DispatchClass::Normal
+		#[pallet::weight(0)]
 		pub fn instantiate_with_code(
 			origin: OriginFor<T>,
 			#[pallet::compact] endowment: BalanceOf<T>,
@@ -130,24 +127,11 @@ pub mod pallet {
             let result = pallet_contracts::Pallet::<T>::instantiate_with_code(
                 origin, endowment, gas_limit, code, data, salt
             );
-			// result
-			// 	.map(
-			// 		|mut post_info| {
-			// 			post_info.actual_weight = Some(0);
-			// 			post_info.pays_fee = Pays::No;
-			// 			post_info
-			// 		}
-			// 	)
-			// 	.map_err(
-			// 		|mut e| {
-			// 			e.post_info.actual_weight = Some(0);
-			// 			e.post_info.pays_fee = Pays::No;
-			// 			e
-			// 		}
-			// 	)
-				// FIXME - For some reason if I use Ok(Pays::No.into()) I do not need to pay
-				// fee but event are not launched, maybe relaunch the DispatchResult
-				// as an event like sudo pallet
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
 			Ok(Pays::No.into())
 		}
 		/// Updates the schedule for metering contracts.
@@ -170,7 +154,7 @@ pub mod pallet {
 		/// This function is identical to [`Self::instantiate_with_code`] but without the
 		/// code deployment step. Instead, the `code_hash` of an on-chain deployed wasm binary
 		/// must be supplied.
-		#[pallet::weight((0, Pays::No))]
+		#[pallet::weight(0)]
 		pub fn instantiate(
 			origin: OriginFor<T>,
 			#[pallet::compact] endowment: BalanceOf<T>,
@@ -183,21 +167,12 @@ pub mod pallet {
 			let result = pallet_contracts::Pallet::<T>::instantiate(
 				origin, endowment, gas_limit, code_hash, data, salt
 			);
-			// result
-			// 	.map(
-			// 		|mut post_info| {
-			// 			post_info.actual_weight = Some(0);
-			// 			post_info.pays_fee = Pays::No;
-			// 			post_info
-			// 		}
-			// 	)
-			// 	.map_err(
-			// 		|mut e| {
-			// 			e.post_info.actual_weight = Some(0);
-			// 			e.post_info.pays_fee = Pays::No;
-			// 			e
-			// 		}
-			// 	)
+			// FIXME - I do not understand why it ask for gas
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
 			Ok(Pays::No.into())
 		}
 		/// Allows block producers to claim a small reward for evicting a contract. If a block
