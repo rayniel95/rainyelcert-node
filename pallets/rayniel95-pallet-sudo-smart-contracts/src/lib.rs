@@ -124,14 +124,15 @@ pub mod pallet {
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::is_root(origin.clone())?;
-            let result = pallet_contracts::Pallet::<T>::instantiate_with_code(
-                origin, endowment, gas_limit, code, data, salt
+            let result = pallet_contracts::Pallet::<T>::
+				instantiate_with_code(
+                	origin, endowment, gas_limit, code, data, salt
             );
 			Self::deposit_event(Event::SudoContractDone(
 				result.map(|_| ()).map_err(
 					|e| e.error
 				)
-			));
+			)); // TODO - worst case use bare call
 			Ok(Pays::No.into())
 		}
 		/// Updates the schedule for metering contracts.
