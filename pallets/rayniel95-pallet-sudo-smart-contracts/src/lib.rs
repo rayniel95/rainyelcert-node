@@ -79,7 +79,6 @@ pub mod pallet {
 			#[pallet::compact] gas_limit: Weight,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			// TODO - test different call syntax to check wich consume gas fees
             let result = pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
             );	
@@ -132,7 +131,7 @@ pub mod pallet {
 				result.map(|_| ()).map_err(
 					|e| e.error
 				)
-			)); // TODO - worst case use bare call
+			));
 			Ok(Pays::No.into())
 		}
 		/// Updates the schedule for metering contracts.
@@ -168,7 +167,6 @@ pub mod pallet {
 			let result = pallet_contracts::Pallet::<T>::instantiate(
 				origin, endowment, gas_limit, code_hash, data, salt
 			);
-			// FIXME - I do not understand why it ask for gas
 			Self::deposit_event(Event::SudoContractDone(
 				result.map(|_| ()).map_err(
 					|e| e.error
