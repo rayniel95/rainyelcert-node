@@ -156,6 +156,7 @@ fn testnet_genesis(
 			key: root_key,
 		},
 		pallet_contracts: ContractsConfig {
+			// TODO - it is necessary to update the scheduler with my own
 			// println should only be enabled on development chains
 			current_schedule: pallet_contracts::Schedule::default()
 			   .enable_println(_enable_println),
