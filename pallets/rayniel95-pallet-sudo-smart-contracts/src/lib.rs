@@ -2,6 +2,8 @@
 
 #[cfg(test)]
 mod tests;
+mod scheduler;
+pub mod weight_info;
 
 use sp_core::crypto::UncheckedFrom;
 
