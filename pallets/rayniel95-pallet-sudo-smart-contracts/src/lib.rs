@@ -2,12 +2,14 @@
 
 #[cfg(test)]
 mod tests;
+mod scheduler;
+pub mod weight_info;
 
 use sp_core::crypto::UncheckedFrom;
 
 use sp_runtime::traits::StaticLookup;
 use frame_support::traits::Currency;
-use pallet_contracts::Schedule;
+use pallet_contracts::{Schedule};
 
 type CodeHash<T> = <T as frame_system::Config>::Hash;
 
@@ -19,19 +21,33 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
+    use frame_support::{
+		dispatch::{
+			DispatchResultWithPostInfo,
+			DispatchErrorWithPostInfo
+		}, 
+		pallet_prelude::*,
+		weights::PostDispatchInfo
+	};
     use frame_system::pallet_prelude::*;
 	use frame_system::RawOrigin;
     use sp_std::vec::Vec; // Step 3.1 will include this in `Cargo.toml`
 	use super::*;
 
-	#[pallet::config]  // <-- Step 2. code block will replace this.
+	#[pallet::config]  // <-- Step 2. code block will cargo clean -p node_templatereplace this.
 	pub trait Config: 
 		frame_system::Config + pallet_contracts::Config + pallet_sudo::Config {
 		// type Currency: Currency<Self::AccountId>;
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
     }
-    // #[pallet::event]   // <-- Step 3. code block will replace this.
-	
+    #[pallet::event]   // <-- Step 3. code block will replace this.
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+	/// Event emitted when a proof has been claimed. [who, claim]
+		/// Event emitted when a claim is revoked by the owner. [who, claim]
+		SudoContractDone(DispatchResult),
+	}
+
     #[pallet::error]   // <-- Step 4. code block will replace this.
     pub enum Error<T> {
 		/// The origin is not the root origin
@@ -43,7 +59,6 @@ pub mod pallet {
     pub struct Pallet<T>(_);
     
     // #[pallet::storage] // <-- Step 5. code block will replace this.
-    
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
     
@@ -53,8 +68,6 @@ pub mod pallet {
 		T::AccountId: UncheckedFrom<T::Hash>,
 		T::AccountId: AsRef<[u8]>,
 	{
-		/// Makes a call to an account, optionally transferring some balance.
-		///
 		/// * If the account is a smart-contract account, the associated code will be
 		/// executed and any value will be transferred.
 		/// * If the account is a regular account, any value will be transferred.
@@ -68,10 +81,16 @@ pub mod pallet {
 			#[pallet::compact] gas_limit: Weight,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			// TODO - test different call syntax to check wich consume gas fees
-            pallet_contracts::Pallet::<T>::call(
+            let result = pallet_contracts::Pallet::<T>::call(
                 origin, dest, value, gas_limit, data
-            )
+            );	
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
+
+			Ok(Pays::No.into())
 		}
 
 		/// Instantiates a new contract from the supplied `code` optionally transferring
@@ -106,9 +125,16 @@ pub mod pallet {
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::is_root(origin.clone())?;
-            pallet_contracts::Pallet::<T>::instantiate_with_code(
-                origin, endowment, gas_limit, code, data, salt
-            )
+            let result = pallet_contracts::Pallet::<T>::
+				instantiate_with_code(
+                	origin, endowment, gas_limit, code, data, salt
+            );
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
+			Ok(Pays::No.into())
 		}
 		/// Updates the schedule for metering contracts.
 		///
@@ -140,9 +166,15 @@ pub mod pallet {
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::is_root(origin.clone())?;
-			pallet_contracts::Pallet::<T>::instantiate(
+			let result = pallet_contracts::Pallet::<T>::instantiate(
 				origin, endowment, gas_limit, code_hash, data, salt
-			)
+			);
+			Self::deposit_event(Event::SudoContractDone(
+				result.map(|_| ()).map_err(
+					|e| e.error
+				)
+			));
+			Ok(Pays::No.into())
 		}
 		/// Allows block producers to claim a small reward for evicting a contract. If a block
 		/// producer fails to do so, a regular users will be allowed to claim the reward.

@@ -45,14 +45,13 @@ sp-std = {default-features = false, version = '3.0.0', git = 'https://github.com
 sp-transaction-pool = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-version = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
-pallet-contracts = { default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
+pallet-contracts = { default-features = false, version = '3.0.0', path='../pallets/contracts'}
 pallet-contracts-primitives = { default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # for rpc
 pallet-contracts-rpc-runtime-api = { default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # local dependencies
-rayniel95-pallet-sudo-smart-contracts = {default-features = false, version = '3.0.0', path = '../pallets/rayniel95-pallet-sudo-smart-contracts'}
 pallet-template = {default-features = false, version = '3.0.0', path = '../pallets/template'}
 
 [features]
@@ -99,5 +98,5 @@ std = [
 	# for rpc
 	'pallet-contracts-rpc-runtime-api/std',
 
-	'rayniel95-pallet-sudo-smart-contracts/std',
+	# 'rayniel95-pallet-sudo-smart-contracts/std',
 ]
