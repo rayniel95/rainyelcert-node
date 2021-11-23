@@ -3767,6 +3767,7 @@ dependencies = [
 name = "node-template"
 version = "3.0.0"
 dependencies = [
+ "bs58",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "jsonrpc-core",
