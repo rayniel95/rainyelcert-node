@@ -308,7 +308,6 @@ parameter_types! {
 impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
-	// TODO - it is possible to configure this to no pay for execution?
 	type Currency = Balances;
 	type Event = Event;
 	type RentPayment = ();
@@ -328,10 +327,7 @@ impl pallet_contracts::Config for Runtime {
 	type DeletionWeightLimit = DeletionWeightLimit;
 	type MaxCodeSize = MaxCodeSize;
 }
-// TODO - maybe it is necessary to override the pallet contract properties here?
-// impl rayniel95_pallet_sudo_smart_contracts::Config for Runtime{
-// 	type Event = Event;
-// }
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
