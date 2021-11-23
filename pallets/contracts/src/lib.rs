@@ -144,7 +144,7 @@ pub mod pallet {
 	use super::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_sudo::Config {
 		/// The time implementation used to supply timestamps to conntracts through `seal_now`.
 		type Time: Time;
 
