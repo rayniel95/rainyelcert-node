@@ -663,7 +663,7 @@ impl<'a, T: Config> rules::Rules for ScheduleRules<'a, T> {
 			SetGlobal(_) => w.global_set,
 			CurrentMemory(_) => w.memory_current,
 			GrowMemory(_) => w.memory_grow,
-			CallIndirect(idx, _) => *self.params.get(idx as usize).unwrap_or(&max_params),
+			CallIndirect(idx, _) => 0,
 			BrTable(ref data) => 0,
 			I32Clz | I64Clz => w.i64clz,
 			I32Ctz | I64Ctz => w.i64ctz,
