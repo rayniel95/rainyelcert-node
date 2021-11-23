@@ -3967,6 +3967,7 @@ dependencies = [
  "pallet-contracts-primitives",
  "pallet-contracts-proc-macro",
  "pallet-randomness-collective-flip",
+ "pallet-sudo",
  "pallet-timestamp",
  "parity-scale-codec",
  "parity-wasm 0.42.2",

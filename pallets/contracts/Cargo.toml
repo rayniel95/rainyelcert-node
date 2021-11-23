@@ -37,6 +37,8 @@ sp-runtime = { version = "3.0.0", default-features = false, git = 'https://githu
 sp-sandbox = { version = "0.9.0", default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05' }
 sp-std = { version = "3.0.0", default-features = false, git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05' }
 
+pallet-sudo = {default-features = false, version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
+
 [dev-dependencies]
 assert_matches = "1"
 hex-literal = "0.3"
