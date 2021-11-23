@@ -141,6 +141,7 @@ type NegativeImbalanceOf<T> =
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use frame_system::RawOrigin;
 	use super::*;
 
 	#[pallet::config]
@@ -357,6 +358,7 @@ pub mod pallet {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
 			let origin = ensure_signed(origin)?;
 			let code_len = code.len() as u32;
 			ensure!(code_len <= T::MaxCodeSize::get(), Error::<T>::CodeTooLarge);
@@ -391,6 +393,7 @@ pub mod pallet {
 			data: Vec<u8>,
 			salt: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			Self::is_root(origin.clone())?;
 			let origin = ensure_signed(origin)?;
 			let mut gas_meter = GasMeter::new(gas_limit);
 			let schedule = <CurrentSchedule<T>>::get();
@@ -458,6 +461,28 @@ pub mod pallet {
 				)),
 			}
 		}
+	}
+
+	impl<T: Config> Pallet<T>
+	where
+		T::AccountId: UncheckedFrom<T::Hash>,
+		T::AccountId: AsRef<[u8]>,
+	{
+		fn is_root(origin: OriginFor<T>) -> Result<(), DispatchError>{
+			let sudo_key = pallet_sudo::Pallet::<T>::key();
+			let test_origin = match origin.into() {
+				Ok(RawOrigin::Signed(account_id)) => {
+					let mut result = Ok(());
+					if sudo_key != account_id{
+						result = Err(DispatchError::BadOrigin);
+					}
+					result
+				}
+				Ok(RawOrigin::Root) => Ok(()),
+				_ => Err(DispatchError::BadOrigin),
+			};
+			test_origin
+		}	
 	}
 
 	#[pallet::event]
