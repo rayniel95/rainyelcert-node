@@ -606,6 +606,7 @@ pub mod pallet {
 		StorageExhausted,
 		/// A contract with the same AccountId already exists.
 		DuplicateContract,
+		NotRootOrigin,
 	}
 
 	/// Current cost schedule for contracts.
