@@ -50,7 +50,6 @@ sp-inherents = {version = '3.0.0', git = 'https://github.com/paritytech/substrat
 sp-runtime = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-transaction-pool = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 substrate-frame-rpc-system = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
-# pallet-contracts = { version = '3.0.0',  git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 pallet-contracts = { default-features = false, version = '3.0.0', path='../pallets/contracts'}
 
 # rpc
