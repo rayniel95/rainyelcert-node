@@ -329,9 +329,9 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeSize = MaxCodeSize;
 }
 // TODO - maybe it is necessary to override the pallet contract properties here?
-impl rayniel95_pallet_sudo_smart_contracts::Config for Runtime{
-	type Event = Event;
-}
+// impl rayniel95_pallet_sudo_smart_contracts::Config for Runtime{
+// 	type Event = Event;
+// }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -352,7 +352,7 @@ construct_runtime!(
 		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
 		// TODO - remember to make a pallet_contracts uncallable
 		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
-		SudoContracts: rayniel95_pallet_sudo_smart_contracts::{Pallet, Call, Event<T>},
+		// SudoContracts: rayniel95_pallet_sudo_smart_contracts::{Pallet, Call, Event<T>},
 	}
 );
 // TODO - use contracts or pallet contracts name to rename sudo smart contracts
