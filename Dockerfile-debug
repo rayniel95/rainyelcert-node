@@ -30,31 +30,19 @@ RUN export HTTP_PROXY="http://192.168.49.1:8282" \
     && rustup target add wasm32-unknown-unknown --toolchain nightly \
     && unset HTTP_PROXY http_proxy https_proxy
 
-RUN export HTTP_PROXY="http://192.168.49.1:8282" \
-    && export http_proxy="http://192.168.49.1:8282" \
-    https_proxy="http://192.168.49.1:8282" \
-    && . $HOME/.cargo/env \
-    && cargo install cargo-chef --version 0.1.21 \
-    && unset HTTP_PROXY http_proxy https_proxy
-
 WORKDIR /usr/src/app
-
-COPY ./recipe.json ./
-# do not use in cargo chef cook --release
-RUN export HTTP_PROXY="http://192.168.49.1:8282" \
-    && export http_proxy="http://192.168.49.1:8282" \
-    https_proxy="http://192.168.49.1:8282" \
-    && . $HOME/.cargo/env \
-    && cargo chef cook \ 
-    && unset HTTP_PROXY http_proxy https_proxy
 
 COPY ./ ./
 
 RUN export HTTP_PROXY="http://192.168.49.1:8282" \
     && export http_proxy="http://192.168.49.1:8282" \
     https_proxy="http://192.168.49.1:8282" \
+    && export CARGO_HTTP_TIMEOUT=300 \
+    && export HTTP_TIMEOUT=300 \
+    && export CARGO_HTTP_LOW_SPEED_LIMIT=1 \
+    && export CARGO_HTTP_PROXY="http://192.168.49.1:8282" HTTPS_PROXY="http://192.168.49.1:8282" \
     && . $HOME/.cargo/env \
-    && cargo build --offline \
+    && cargo build \
     && unset HTTP_PROXY http_proxy https_proxy
 
 ################################################################
