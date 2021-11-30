@@ -201,17 +201,17 @@ You should now see Dave is catching up blocks and only has one peer which belong
 
 # Installing and playing with the smart contracts
 
+Execute the node:
+
+```bash
+docker run --rm -it --network host rayniel95/rainyelledger:v0.1 ./node-template --dev --tmp
+```
+
 To instantiate a smart contract, the extrinsic should be sumbited by the sudo account. It is not necessary to provide a gas limit because the extrinsics of the contract are feeless.
 
 ![](./img/instantiate_contract.png)
 
-
-
-
-
-
-
-
+Once the contract have been instantiated you can start submitting calls to it. It is possible to do RPC calls to the contract storage.
 
 ### Embedded Docs
 
