@@ -1,47 +1,142 @@
-Problems:
+# About
 
-For some reason it is necessary to use vpn for download crates inside docker container. Crates cache is not allowed for some reason, mount volume not work, bind volume not work, solution to this, compile in the host and copy the artifacts to docker image. A better solution would be use cargo chef to compile and layered crates in docker image.
+RainyelLedger is a permissioned blockchain platform that is capable of execute smart 
+contracts programmed with ink!. The request to the contract storage is made via RPC and authorization of administrators is necessary to join the network. Instantiation of the smart contracts on the network is only authorized to administrators. The node of Substrate was modified to create a permissioned node, the authorization node pallet was used to provide access to the network, the smart contract pallet was modified to provide feeless smart contract execution. RainyelLedger was created using [Substrate][1].
 
 # Requirements
 
 - cargo-chef v0.1.21
+- Docker
 
-# Substrate Node Template
+# How to execute
 
-[![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://playground.substrate.dev/?deploy=node-template)
+Execute 
 
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+```sh 
+docker build -f Dockerfile-debug -t rayniel95/rainyelledger:v0.1 ./
+``` 
 
-## Getting Started
+to create the docker image.
 
-Follow the steps below to get started with the Node Template, or get it up and running right from your browser
-in just a few clicks using [Playground](https://playground.substrate.dev/) :hammer_and_wrench:
+Execute 
 
-### Using Nix
+```sh 
+docker run --rm -it --network host rayniel95/rainyelledger:v0.1 ./node-template --tmp --dev
+``` 
 
-Install [nix](https://nixos.org/) and optionally [direnv](https://github.com/direnv/direnv) and [lorri](https://github.com/target/lorri) for a fully plug
-and play experience for setting up the development environment. To get all the correct dependencies activate direnv `direnv allow` and lorri `lorri shell`.
+to run the node.
 
-### Rust Setup
+# Creating a test network using Docker
 
-First, complete the [basic Rust setup instructions](./docs/rust-setup.md).
+# Creating a test network manually
 
-### Run
+For this demonstration, we'll launch 4 nodes: 3 well known nodes that are allowed to author and validate blocks, and 1 sub-node that only has read-only access to data from a selected well-known node (upon it's approval).
 
-Use Rust's native `cargo` command to build and launch the template node:
+## Obtaining Node Keys and PeerIDs
 
-```sh
-cargo run --release -- --dev --tmp
+### For Alice's well known node:
+
+```bash
+# node key
+c12b6d18942f5ee8528c8e2baf4e147b5c5c18710926ea492d09cbd9f6c9f82a
+
+# peerid, generated from node key
+12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2
+
+# bs58 decoded peer id in hex:
+0024080112201ce5f00ef6e89374afb625f1ae4c1546d31234e87e3c3f51a62b91dd6bfa57df
 ```
 
-### Build
+### For Bob's well known node:
 
-The `cargo run` command will perform an initial build. Use the following command to build the node
-without launching it:
+```bash
+# node key
+6ce3be907dbcabf20a9a5a60a712b4256a54196000a8ed4050d352bc113f8c58
 
-```sh
-cargo build --release
+# peer id, generated from node key
+12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust
+
+# bs58 decoded peer id in hex:
+002408011220dacde7714d8551f674b8bb4b54239383c76a2b286fa436e93b2b7eb226bf4de7
 ```
+
+### For Charlie's NOT well known node:
+
+```bash
+# node key
+3a9d5b35b9fb4c42aafadeca046f6bf56107bd2579687f069b42646684b94d9e
+
+# peer id, generated from node key
+12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ
+
+# bs58 decoded peer id in hex:
+002408011220876a7b4984f98006dc8d666e28b60de307309835d775e7755cc770328cdacf2e
+```
+
+### For Dave's sub-node (to Charlie, more below):
+
+```bash
+# node key
+a99331ff4f0e0a0434a6263da0a5823ea3afcfffe590c9f3014e6cf620f2b19a
+
+# peer id, generated from node key
+12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN
+
+# bs58 decoded peer id in hex:
+002408011220c81bc1d7057a1511eb9496f056f6f53cdfe0e14c8bd5ffca47c70a8d76c1326d
+```
+
+The nodes of Alice and Bob are already configured in genesis storage and serve as well known nodes. We will later add Charlie's node into the set of well known nodes. Finally we will add the connection between Charlie's node and Dave's node without making Dave's node as a well known node.
+
+## Alice and Bob Start the Network
+
+Let's start Alice's node first:
+
+```bash
+docker run --rm -it --network host rayniel95/rainyelledger:v0.1 ./node-template \
+--chain=local \
+--base-path /tmp/validator1 \
+--alice \
+--node-key=c12b6d18942f5ee8528c8e2baf4e147b5c5c18710926ea492d09cbd9f6c9f82a \
+--port 30333 \
+--ws-port 9944
+```
+
+Here we are using --node-key to specify the key that are used for the security connection of the network. This key is also used internally to generate the human readable PeerId as shown in above section.
+
+Other used CLI flags are:
+
+- `--chain=local` for a local testnet (not the same as the `--dev` flag!).
+- `--alice` to make the node an authority which can author and finalize block, also give the node a name which is alice.
+- `--port` assign a port for peer to peer connection.
+- `--ws-port` assign a listening port for WebSocket connection.
+
+Start Bob's node:
+
+```bash
+# In a new terminal, leave Alice running
+docker run --rm -it --network host rayniel95/rainyelledger:v0.1 ./node-template \
+--chain=local \
+--base-path /tmp/validator2 \
+--bob \
+--node-key=6ce3be907dbcabf20a9a5a60a712b4256a54196000a8ed4050d352bc113f8c58 \
+--port 30334 \
+--ws-port 9945
+```
+
+
+
+# Installing and playing with the smart contracts
+
+
+[1]: https://github.com/substrate-developer-hub/substrate-node-template
+
+
+
+
+
+
+
 
 ### Embedded Docs
 
