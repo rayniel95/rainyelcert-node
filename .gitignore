@@ -7,10 +7,11 @@
 .DS_Store
 
 # The cache for docker container dependency
-.cargo
+# .cargo
 
 # The cache for chain data in container
 .local
 
 # direnv cache
 .direnv
+NOTES

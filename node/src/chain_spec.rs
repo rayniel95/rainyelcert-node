@@ -1,13 +1,16 @@
 use sp_core::{Pair, Public, sr25519};
 use node_template_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, SystemConfig, WASM_BINARY, Signature
+	SudoConfig, SystemConfig, WASM_BINARY, Signature, NodeAuthorizationConfig
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{Verify, IdentifyAccount};
 use sc_service::ChainType;
 
+use node_template_runtime::ContractsConfig;
+
+use sp_core::OpaquePeerId; // A struct wraps Vec<u8>, represents as our `PeerId`.
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -153,5 +156,23 @@ fn testnet_genesis(
 			// Assign network admin rights.
 			key: root_key,
 		},
+		pallet_contracts: ContractsConfig {
+			// TODO - it is necessary to update the scheduler with my own
+			// println should only be enabled on development chains
+			current_schedule: pallet_contracts::Schedule::default()
+			   .enable_println(_enable_println),
+		 },
+		pallet_node_authorization: NodeAuthorizationConfig {
+            nodes: vec![
+                (
+                    OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()),
+                    endowed_accounts[0].clone()
+                ),
+                (
+                    OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()),
+                    endowed_accounts[1].clone()
+                ),
+            ],
+        },
 	}
 }

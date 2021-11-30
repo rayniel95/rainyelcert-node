@@ -21,6 +21,7 @@ substrate-build-script-utils = {version = '3.0.0', git = 'https://github.com/par
 [dependencies]
 jsonrpc-core = '15.1.0'
 structopt = '0.3.8'
+bs58 = "0.4.0"
 
 # Substrate dependencies
 frame-benchmarking = {version = '3.1.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
@@ -50,6 +51,10 @@ sp-inherents = {version = '3.0.0', git = 'https://github.com/paritytech/substrat
 sp-runtime = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 sp-transaction-pool = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 substrate-frame-rpc-system = {version = '3.0.0', git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
+pallet-contracts = { default-features = false, version = '3.0.0', path='../pallets/contracts'}
+
+# rpc
+pallet-contracts-rpc = { version = '3.0.0',  git = 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-05'}
 
 # local dependencies
 node-template-runtime = {version = '3.0.0', path = '../runtime'}
